@@ -13,4 +13,8 @@ urlpatterns = [
     path('comparar', views.comparar, name='comparar'),  
     path('ranking_dif_genero_asc/<int:pagina>', views.ranking_dif_genero_asc, name='ranking_dif_genero_asc'),  
     path('ranking_dif_genero_desc/<int:pagina>', views.ranking_dif_genero_desc, name='ranking_dif_genero_desc'),  
+    path('ranking_mas_buscados_asc/<int:pagina>', views.ranking_mas_buscados_asc, name='ranking_mas_buscados_asc'),  
+    path('ranking_mas_buscados_desc/<int:pagina>', views.ranking_mas_buscados_desc, name='ranking_mas_buscados_desc'), 
+    path('detalle_apellido2/<str:apellido>', views.detalle_apellido2, name='detalle_apellido2'),  
+
 ]       

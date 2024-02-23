@@ -39,6 +39,7 @@ class Apellido(models.Model):
     posc_ranking_cuenta = models.IntegerField(blank=True, null=True)
     descripcion = models.CharField(max_length=5000, blank=True, null=True)
     dif_genero = models.FloatField(blank=True, null=True)
+    cuenta_busqueda = models.IntegerField(blank=True, null=True)
 
 
     def __str__(self):

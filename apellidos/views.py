@@ -175,6 +175,8 @@ def detalle_apellido(request):
             apellido_p = apellido_p.strip()
             total_personas = Persona.objects.all().count()  #esto deberia estar en una tabla para no calcularlo con cada consulta 
             apellido_obj = Apellido.objects.get(apellido=apellido_p)
+            apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1
+            apellido_obj.save()
             if apellido_obj.descripcion is None:
                 descripcion = obtener_origen_openai(apellido_p)
                 descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido_p)
@@ -566,7 +568,11 @@ def combinar(request):
             apellido2_req = apellido2_req.lower()
             apellido2_req = apellido2_req.capitalize()
             apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
+            apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
+            apellido1_obj.save()
             apellido2_obj = Apellido.objects.get(apellido=apellido2_req) 
+            apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
+            apellido2_obj.save()
             #descripcion apellido1
             if apellido1_obj.descripcion is None:
                 descripcion = obtener_origen_openai(apellido1_req)
@@ -701,7 +707,11 @@ def comparar(request):
             apellido2_req = apellido2_req.lower()
             apellido2_req = apellido2_req.capitalize()
             apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
+            apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
+            apellido1_obj.save()
             apellido2_obj = Apellido.objects.get(apellido=apellido2_req)
+            apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
+            apellido2_obj.save()
             porcentaje_apellido1 = round((apellido1_obj.cuenta*100) /  total_general_personas ,5  ) 
             porcentaje_apellido2 = round((apellido2_obj.cuenta*100) /  total_general_personas ,5 )  
             apellido1_porcentaje_mujer = round ((apellido1_obj.mujeres*100)/apellido1_obj.cuenta , 1)
@@ -969,3 +979,244 @@ def error_404(request, exception):
 
 def error_500(request):
     return render(request, 'apellidos/error.html', status=500)
+
+def ranking_mas_buscados_desc(request,pagina):
+    try:
+        titulo = 'Por veces buscado'
+        descripcion = 'Mostrando los datos ordenados segun la cantidad de veces que se buscó'
+        num_elementos = 150
+        lista_elementos=list()
+        inicio = (num_elementos * (pagina -1))
+        fin = num_elementos * pagina 
+        #apellidos = Apellido.objects.all().order_by('-cuenta_busqueda')[inicio:fin]
+        apellidos = Apellido.objects.exclude(cuenta_busqueda=0).order_by('-cuenta_busqueda')[inicio:fin]
+        total_apellidos = len(apellidos)
+        contador = inicio
+        caracteristica='Busquedas'
+        ranking_actual_desc = 'ranking_mas_buscados_desc'
+        ranking_actual_asc = 'ranking_mas_buscados_asc'
+        ranking_actual='ranking_mas_buscados_desc'
+        for e in apellidos:
+            contador=contador+1
+            tupla=(contador, e.apellido,  round(e.cuenta_busqueda))
+            lista_elementos.append(tupla)
+        style_asc='bg-white text-dark border-dark'
+        style_desc = 'bg-dark text-light border-dark'
+        #sobre paginacion 
+        total_paginas =  math.ceil(total_apellidos/num_elementos)
+        pagina_prev = pagina-1
+        pagina_next = pagina+1
+        lista_paginas = list()
+        if(pagina>=3 and pagina<=(total_paginas-2)):
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+        if(pagina==2):
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+            lista_paginas.append(pagina+3)
+        if(pagina==1):
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+            lista_paginas.append(pagina+3)
+            lista_paginas.append(pagina+4)
+        if(pagina==total_paginas):
+            lista_paginas.append(pagina-4)
+            lista_paginas.append(pagina-3)
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+        if(pagina==(total_paginas-1)):
+            lista_paginas.append(pagina-3)
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+        if(total_paginas<5):
+            lista_paginas= list()
+            for i in range(total_paginas):
+                lista_paginas.append(i+1)
+        context= { 
+            'apellidos':apellidos, 
+            'style_asc':style_asc,
+            'lista_elementos':lista_elementos,
+            'caracteristica':caracteristica, 
+            'ranking_actual_desc':ranking_actual_desc, 
+            'ranking_actual_asc':ranking_actual_asc,
+            'ranking_actual':ranking_actual,
+            'titulo':titulo,
+            'pagina_actual':pagina,
+            'total_paginas':total_paginas,
+            'pagina_next':pagina_next,
+            'pagina_prev':pagina_prev,
+            'lista_paginas':lista_paginas,
+            'style_desc':style_desc,
+            'descripcion':descripcion   
+            }
+        return render(request, 'apellidos/ranking.html', context)
+    except Exception as e:
+        context = {'error':e}
+        return render(request, 'apellidos/error.html', context)
+
+def ranking_mas_buscados_asc(request,pagina):
+    try:
+        titulo = 'Por veces buscado'
+        descripcion = 'Mostrando los datos ordenados segun la cantidad de veces que se buscó'
+        num_elementos = 150
+        lista_elementos=list()
+        inicio = (num_elementos * (pagina -1))
+        fin = num_elementos * pagina 
+        #apellidos = Apellido.objects.all().order_by('-cuenta_busqueda')[inicio:fin]
+        apellidos = Apellido.objects.exclude(cuenta_busqueda=0).order_by('cuenta_busqueda')[inicio:fin]
+        total_apellidos = len(apellidos)
+        contador = inicio
+        caracteristica='Busquedas'
+        ranking_actual_desc = 'ranking_mas_buscados_desc'
+        ranking_actual_asc = 'ranking_mas_buscados_asc'
+        ranking_actual='ranking_mas_buscados_asc'
+        for e in apellidos:
+            contador=contador+1
+            tupla=(contador, e.apellido,  round(e.cuenta_busqueda))
+            lista_elementos.append(tupla)
+        style_asc='bg-white text-dark border-dark'
+        style_desc = 'bg-dark text-light border-dark'
+        #sobre paginacion 
+        total_paginas =  math.ceil(total_apellidos/num_elementos)
+        pagina_prev = pagina-1
+        pagina_next = pagina+1
+        lista_paginas = list()
+        if(pagina>=3 and pagina<=(total_paginas-2)):
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+        if(pagina==2):
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+            lista_paginas.append(pagina+3)
+        if(pagina==1):
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+            lista_paginas.append(pagina+2)
+            lista_paginas.append(pagina+3)
+            lista_paginas.append(pagina+4)
+        if(pagina==total_paginas):
+            lista_paginas.append(pagina-4)
+            lista_paginas.append(pagina-3)
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+        if(pagina==(total_paginas-1)):
+            lista_paginas.append(pagina-3)
+            lista_paginas.append(pagina-2)
+            lista_paginas.append(pagina-1)
+            lista_paginas.append(pagina)
+            lista_paginas.append(pagina+1)
+        if(total_paginas<5):
+            lista_paginas= list()
+            for i in range(total_paginas):
+                lista_paginas.append(i+1)
+        context= { 
+            'apellidos':apellidos, 
+            'style_asc':style_asc,
+            'lista_elementos':lista_elementos,
+            'caracteristica':caracteristica, 
+            'ranking_actual_desc':ranking_actual_desc, 
+            'ranking_actual_asc':ranking_actual_asc,
+            'ranking_actual':ranking_actual,
+            'titulo':titulo,
+            'pagina_actual':pagina,
+            'total_paginas':total_paginas,
+            'pagina_next':pagina_next,
+            'pagina_prev':pagina_prev,
+            'lista_paginas':lista_paginas,
+            'style_desc':style_desc,
+            'descripcion':descripcion   
+            }
+        return render(request, 'apellidos/ranking.html', context)
+    except Exception as e:
+        context = {'error':e}
+        return render(request, 'apellidos/error.html', context)
+ 
+
+def detalle_apellido2(request,apellido):
+    try:
+        apellido_p = apellido
+        apellido_p = apellido_p.lower()
+        apellido_p = apellido_p.capitalize()
+        apellido_p = apellido_p.strip()
+        total_personas = Persona.objects.all().count()  #esto deberia estar en una tabla para no calcularlo con cada consulta 
+        apellido_obj = Apellido.objects.get(apellido=apellido_p)
+        apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1
+        apellido_obj.save()
+        if apellido_obj.descripcion is None:
+            descripcion = obtener_origen_openai(apellido_p)
+            descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido_p)
+            apellido_obj.descripcion = descripcion
+            apellido_obj.save()
+        total_apellido = int(apellido_obj.cuenta)
+        porcentaje_apellido = round( (total_apellido*100)/total_personas  , 5)
+        regiones_orden_geografico = (15,1,2,3,4,5,13,6,7,16,8,9,14,10,11,12,17)
+        detalle_regiones=list()
+        edad_promedio = round(apellido_obj.edad_promedio)
+        #obtener datos guardados
+        contador_region = RegionApellido.objects.filter(apellido=apellido_obj)
+        for i in regiones_orden_geografico:
+                region_obj = Region.objects.get(id=i)
+                romano = region_obj.numero
+                nombre = region_obj.nombre
+                #region_apellido = RegionApellido.objects.filter(region=region_obj,apellido=apellido_obj)
+                region_apellido_elemento = contador_region.get(region=region_obj.id)
+                region_apellido = region_apellido_elemento
+                contador_r = region_apellido.cuenta
+                porcentaje = int(contador_r* 100)/(total_apellido)
+                style_width=(f"width:{porcentaje}%;")
+                tupla = (romano, nombre, contador_r, porcentaje,style_width)
+                detalle_regiones.append(tupla)
+        porcentaje_mujeres = round( (int(apellido_obj.mujeres) * 100) / int(apellido_obj.cuenta) , 2)
+        porcentaje_hombres= round( (int(apellido_obj.hombres) * 100) / int(apellido_obj.cuenta), 2)
+        style_mujeres = (f"width:{porcentaje_mujeres}%;")
+        style_hombres = (f"width:{porcentaje_hombres}%;")     
+        listado_etario = list()
+        listado_etario.append(apellido_obj.etario1)
+        listado_etario.append(apellido_obj.etario2)
+        listado_etario.append(apellido_obj.etario3)
+        listado_etario.append(apellido_obj.etario4)
+        listado_etario.append(apellido_obj.etario5)
+        listado_etario.append(apellido_obj.etario6)
+        listado_etario.append(apellido_obj.etario7)
+        listado_etario.append(apellido_obj.etario8)
+        listas_encabezados = list()
+        listas_encabezados.append('19-29')
+        listas_encabezados.append('30-39')
+        listas_encabezados.append('40-49')
+        listas_encabezados.append('50-59')
+        listas_encabezados.append('60-69')
+        listas_encabezados.append('70-79')
+        listas_encabezados.append('80-89')
+        listas_encabezados.append('90+')
+        context = {
+            'apellido':apellido_obj, 
+            'detalle_regiones':detalle_regiones,
+            'porcentaje_apellido':porcentaje_apellido, 
+            'style_mujeres':style_mujeres, 
+            'style_hombres':style_hombres,
+            'porcentaje_hombres':porcentaje_hombres,
+            'porcentaje_mujeres':porcentaje_mujeres,
+            'listado_etario_json':json.dumps(listado_etario),
+            'lista_encabezados_json':json.dumps(listas_encabezados),
+            'edad_promedio':edad_promedio,
+            }
+        return render(request, 'apellidos/detalle_apellido.html',context)
+    except Exception as e:
+        context = {'error':e}
+        return render(request, 'apellidos/error.html',context)
+     

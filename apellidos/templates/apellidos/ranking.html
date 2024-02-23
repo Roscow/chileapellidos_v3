@@ -30,11 +30,17 @@
           </thead>
           <tbody>
             {% for e in lista_elementos %}
-            <tr>
-              <td> N° {{ e.0|formato_miles }}</td>
-              <td> {{ e.1 }}</td>
-              <td> {{ e.2|formato_miles }} </td>
-            </tr>
+            
+              <tr>
+                <td> N° {{ e.0|formato_miles }}</td>
+                <td> 
+                  <a href="{% url 'detalle_apellido2' e.1 %}" style="text-decoration: none; color: black;">
+                    {{ e.1 }}
+                  </a>
+                </td>
+                <td> {{ e.2|formato_miles }} </td>
+              </tr>
+           
             {% endfor %}
     </table>   
     <nav aria-label="Page navigation example ">
