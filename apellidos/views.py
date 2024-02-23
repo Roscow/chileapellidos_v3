@@ -963,3 +963,9 @@ def ranking_dif_genero_desc(request,pagina):
         context = {'error':e}
         return render(request, 'apellidos/error.html', context)
   
+
+def error_404(request, exception):
+    return render(request, 'apellidos/error.html', status=404)
+
+def error_500(request):
+    return render(request, 'apellidos/error.html', status=500)
