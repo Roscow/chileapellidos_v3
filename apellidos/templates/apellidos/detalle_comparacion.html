@@ -1,0 +1,262 @@
+{% extends 'apellidos/comparar.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block detalle %}
+<br>
+<hr>
+<p class="fs-3 text-center">Descripción</p>
+<div class="row">
+    <div class="col-lg-6 col-sm-12" style="overflow-y: auto;">
+      <p class="fs-3 text-center">{{apellido1_obj.apellido}}</p>
+        <p>{{apellido1_obj.descripcion}}</p>
+    </div>
+    <div class="col-lg-6 col-sm-12" style="overflow-y: auto;">
+      <p class="fs-3 text-center">{{apellido2_obj.apellido}}</p>
+
+        <p>{{apellido2_obj.descripcion}}</p>
+    </div>
+</div>
+<br>
+<hr>
+<p class="fs-3 text-center">Datos generales</p>
+<div class="row">
+    <div class="col-lg-6 col-md-6">
+        <table class="table table-hover table-bordered caption-top table-primary">
+          <caption > {{apellido1_obj.apellido}} </caption>
+            <thead>
+              <th>Indicador</th>
+              <th>Valor</th>
+            </thead>
+            <tr>
+              <td>Total Personas</td>
+              <td>{{apellido1_obj.cuenta|formato_miles}}</td>
+            </tr>
+            <tr>
+              <td>Porcentaje </td>
+              <td>{{porcentaje_apellido1}}%</td>
+            </tr>
+            <tr>
+              <td>Mujeres </td>
+              <td>{{apellido1_obj.mujeres|formato_miles}} ({{apellido1_porcentaje_mujer}}%)</td>
+            </tr>
+            <tr>
+              <td>Hombres </td>
+              <td>{{apellido1_obj.hombres|formato_miles}}  ({{apellido1_porcentaje_hombre}}%)</td>
+            </tr>
+            <tr>
+              <td>Mujeres vs Hombres</td>
+              <td>
+                <div class="progress-stacked">
+                  <div class="progress" role="progressbar" aria-label="Segment one"  aria-valuemin="0" aria-valuemax="100" style={{style1_mujeres}}>
+                    <div class="progress-bar bg-Primary">&#9792; </div>
+                  </div>
+                  <div class="progress" role="progressbar" aria-label="Segment two"  aria-valuemin="0" aria-valuemax="100" style={{style1_hombres}}>
+                    <div class="progress-bar bg-info">&#9794; </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Edad Promedio </td>
+              <td>{{apellido1_obj.edad_promedio|floatformat:'0'}} años</td>
+            </tr>
+        </table> 
+    </div>
+    <div class="col-lg-6 col-md-6">        
+        <table class="table table-hover table-bordered caption-top table-danger">
+          <caption > {{apellido2_obj.apellido}} </caption>
+              <thead>
+                <th>Indicador</th>
+                <th>Valor</th>
+              </thead>
+              <tr>
+                <td>Total Personas</td>
+                <td>{{apellido2_obj.cuenta|formato_miles}}</td>
+              </tr>
+              <tr>
+                <td>Porcentaje </td>
+                <td>{{porcentaje_apellido2}}%</td>
+              </tr>
+              <tr>
+                <td>Mujeres </td>
+                <td>{{apellido2_obj.mujeres|formato_miles}}  ({{apellido2_porcentaje_mujer}}%)</td>
+              </tr>
+              <tr>
+                <td>Hombres </td>
+                <td>{{apellido2_obj.hombres|formato_miles}} ({{apellido2_porcentaje_hombre}}%)</td>
+              </tr>
+              <tr>
+                <td>Mujeres vs Hombres</td>
+                <td>
+                  <div class="progress-stacked">
+                    <div class="progress" role="progressbar" aria-label="Segment one"  aria-valuemin="0" aria-valuemax="100" style={{style2_mujeres}}>
+                      <div class="progress-bar bg-danger">&#9792; </div>
+                    </div>
+                    <div class="progress" role="progressbar" aria-label="Segment two"  aria-valuemin="0" aria-valuemax="100" style={{style2_hombres}}>
+                      <div class="progress-bar" style="background-color: orange;">&#9794; </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Edad Promedio </td>
+                <td>{{apellido2_obj.edad_promedio|floatformat:'0'}} años</td>
+              </tr>
+        </table> 
+    </div>
+</div>
+<br>
+<hr>
+<p class="fs-3 text-center">Etario</p>
+<div class="row">
+    <div class="col-lg-6 col-md-6">
+      <caption > {{apellido1_obj.apellido}} </caption>
+        <canvas id="histogramaEdades1" width="100%" height="50%"></canvas>
+    </div>
+    <div class="col-lg-6 col-md-6">
+      <caption > {{apellido2_obj.apellido}} </caption>
+        <canvas id="histogramaEdades2" width="100%" height="50%"></canvas>
+    </div>
+</div>
+<br>
+<hr>
+<p class="fs-3 text-center">Distribucion regional</p>
+
+<div class="row">
+    <table class="table table-bordered caption-top">
+        <caption>Distribucion regional</caption>
+          <thead>
+          <tr>
+              <th scope="col" class="text-end">Porc.1</th>
+              <th scope="col" class="text-end">{{apellido1_obj.apellido}} </th>
+              <th class="text-end">N°</th>
+              <th  class="d-none d-sm-table-cell text-center">Region</th>
+              <th scope="col">{{apellido2_obj.apellido}}</th>
+              <th scope="col">Porc.2</th>
+          </tr>
+          </thead>
+          <tbody>
+              {% for elem in detalle_regiones3 %}
+                  <tr>                            
+                      <td class="text-end">{{elem.2|floatformat:1}}%</td>
+                      <td>
+                          <div class="progress" style="direction: rtl;">
+                              <div class="progress-bar bg-primary" role="progressbar" style={{elem.3}} aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                      </td>  
+                      <td class="text-center">{{elem.0}}</td>
+                      <td class="d-none d-sm-table-cell text-center">{{elem.1}}</td>
+                      <td>
+                        <div class="progress" >
+                            <div class="progress-bar bg-danger" role="progressbar" style={{elem.5}} aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </td>
+                      <td>{{elem.4|floatformat:1}}%</td>
+                  </tr>
+                  {% endfor %}                                                                                      
+          </tbody>
+  
+      </table>  
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Obtener el contexto del canvas
+    var ctx = document.getElementById('histogramaEdades1').getContext('2d');
+    var listado_etario1  = {{ listado_etario1_json|safe }};
+
+    // Datos para el histograma (puedes reemplazarlos con tus propios datos)
+    var datos = {
+        labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
+        datasets: [{
+            label: 'Número de personas',
+            data:listado_etario1,
+            backgroundColor: 'rgba(0, 0, 255, 0.3)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración del histograma
+    var configuracion = {
+        type: 'bar',
+        data: datos,
+        options: {
+            indexAxis: 'y',
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Rango edad'
+                    }
+                },
+                x: {
+                    min: 0,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Numero de personas'
+                    }
+                }
+            }
+        }
+    };
+
+    // Crear el histograma
+    var miHistograma = new Chart(ctx, configuracion);
+  </script>
+
+<script>
+    // Obtener el contexto del canvas
+    var ctx = document.getElementById('histogramaEdades2').getContext('2d');
+    var listado_etario2  = {{ listado_etario2_json|safe }};
+
+    // Datos para el histograma (puedes reemplazarlos con tus propios datos)
+    var datos = {
+        labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
+        datasets: [{
+            label: 'Número de personas',
+            data:listado_etario2,
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración del histograma
+    var configuracion = {
+        type: 'bar',
+        data: datos,
+        options: {
+            indexAxis: 'y',
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Rango edad'
+                    }
+                },
+                x: {
+                    min: 0,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Numero de personas'
+                    }
+                }
+            }
+        }
+    };
+
+    // Crear el histograma
+    var miHistograma = new Chart(ctx, configuracion);
+  </script>
+{% endblock  %}

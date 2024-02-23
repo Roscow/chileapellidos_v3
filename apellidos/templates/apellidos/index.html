@@ -1,0 +1,224 @@
+{% extends 'apellidos/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+
+{% block contenido %}
+    <br>
+    <p class="fs-1 text-center">Datos Generales</p>
+    <hr>
+    <div class="row">
+      <div class="col-lg-6 col-md-6">
+          <table class="table table-hover table-bordered caption-top">
+            <caption >Datos generales analizados</caption>
+              <thead>
+                <th>Indicador</th>
+                <th>Valor</th>
+              </thead>
+              <tr>
+                <td>Total Personas</td>
+                <td>{{estado_mas_reciente.cuenta_personas|formato_miles}}</td>
+              </tr>
+              <tr>
+                <td>Total Mujeres </td>
+                <td>{{estado_mas_reciente.cuenta_mujeres|formato_miles}} ({{porcentaje_mujeres}}%) </td>
+              </tr>
+              <tr>
+                <td>Total Hombres </td>
+                <td>{{estado_mas_reciente.cuenta_hombres|formato_miles}}  ({{porcentaje_hombres}}%) </td>
+              </tr>
+              <tr>
+                <td>Total Apellidos </td>
+                <td>{{estado_mas_reciente.cuenta_apellidos|formato_miles}} </td>
+              </tr>
+              <tr>
+                <td>Mujeres vs Hombres</td>
+                <td>
+                  <div class="progress-stacked">
+                    <div class="progress" role="progressbar" aria-label="Segment one"  aria-valuemin="0" aria-valuemax="100" style={{style_mujeres}}>
+                      <div class="progress-bar bg-dark text-light">&#9792; </div>
+                    </div>
+                    <div class="progress" role="progressbar" aria-label="Segment two"  aria-valuemin="0" aria-valuemax="100" style={{style_hombres}}>
+                      <div class="progress-bar bg-light text-dark border-dark"  style="border: 1px solid black">&#9794; </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Ultima Revisión</td>
+                <td>{{estado_mas_reciente.fecha}}</td>
+              </tr>
+          </table> 
+
+      </div>
+      <div class="col-lg-6 col-md-6">
+        <caption>Gráfico de rangos etarios</caption>
+        <canvas id="histogramaEdades" width="100%" height="50%"></canvas>
+      </div>
+    </div> 
+    <hr>
+    <div class="row">
+      <div class="col-lg-12 col-md-12">
+        
+          <table class="table table-bordered caption-top">
+            <caption>Distribución regional de la población</caption>
+              <thead>
+              <tr>
+                  <th scope="col">N°</th>
+                  <th scope="col">Región</th>
+                  <th class="d-none d-md-block " scope="col">Cuenta</th>
+                  <th scope="col">Porc.</th>
+                  <th scope="col">Indicador</th>
+              </tr>
+              </thead>
+              <tbody>
+                  {% for elem in detalle_regiones %}
+                      <tr>                            
+                          <td>{{elem.0}}</td>
+                          <td>{{elem.1}}</td>
+                          <td class="d-none d-md-block " >{{elem.2|formato_miles}}</td>
+                          <td>{{elem.3|floatformat:1}}%</td>
+                          <td>
+                              <div class="progress">
+                                  <div class="progress-bar bg-dark" role="progressbar" style={{elem.4}} aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                              </div>
+                          </td>                            
+                      </tr>
+                      {% endfor %}                                                                                      
+              </tbody>
+      
+          </table>  
+      </div>
+    </div>    
+    <hr>
+    <p>Los datos analizados en este proyecto se obtienen de fuentes no oficiales, lo que significa que se realiza un arduo proceso de rastreo a través de diferentes fuentes en internet. Por lo tanto, es posible que no contemos con la totalidad de los datos actuales ni que la información esté completamente actualizada. Como resultado, este proyecto no garantiza una precisión del 100%, sino que sirve como punto de referencia. A continuación, se muestra el progreso en tiempo real del rastreo de los datos analizados.</p>
+    <hr>
+    <div class="row">
+      <div class="col-lg-6 col-sm-12">
+        <caption>Gráfico de personas analizadas</caption>
+        <canvas id="graficoLinea2"></canvas>
+      </div>
+
+      <div class="col-lg-6 col-sm-12">
+        <caption>Gráfico de apellidos analizados</caption>
+        <canvas id="graficoLinea1"></canvas>
+      </div>
+    </div>
+   <br>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Obtener el contexto del canvas
+    var ctx = document.getElementById('histogramaEdades').getContext('2d');
+    var listado_etario  = {{ listado_etario_json|safe }};
+
+    // Datos para el histograma (puedes reemplazarlos con tus propios datos)
+    var datos = {
+        labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
+        datasets: [{
+            label: 'N° Personas vs  Rango Edad',
+            data:listado_etario,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            borderColor: 'rgba(0, 0, 0, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración del histograma
+    var configuracion = {
+        type: 'bar',
+        data: datos,
+        options: {
+            indexAxis: 'y',
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Rango edad'
+                    }
+                },
+                x: {
+                    min: 0,
+                    reverse: true,
+                    title: {
+                      display: true,
+                      text: 'Número de personas'
+                    }
+                }
+            }
+        }
+    };
+
+    // Crear el histograma
+    var miHistograma = new Chart(ctx, configuracion);
+  </script>
+
+    <script>
+        // Datos del gráfico (puedes ajustar estos valores según tus necesidades)
+        var fechas_ultimos_30_dias = {{ fechas_ultimos_30_dias_json|safe }};
+        var datos_scraping  = {{ cuentas_ultimos_30_dias_json|safe }};
+        var datos2 = {
+            labels: fechas_ultimos_30_dias,
+            datasets: [
+                {
+                    label: 'Personas encontradas',
+                    borderColor: 'gray',
+                    data: datos_scraping,
+                }
+            ]
+        };
+        // Configuración del gráfico
+        var configuracion2 = {
+            type: 'line',
+            data: datos2,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min:0
+                    }
+                }
+            }
+        };
+        var contexto2 = document.getElementById('graficoLinea2').getContext('2d');
+        var miGrafico2 = new Chart(contexto2, configuracion2);
+    </script>
+
+<script>
+  // Datos del gráfico (puedes ajustar estos valores según tus necesidades)
+  var fechas_ultimos_30_dias = {{ fechas_ultimos_30_dias_json|safe }};
+  var datos_scraping  = {{ cuentas_apellidos_ultimos_30_dias_json|safe }};
+  var datos2 = {
+      labels: fechas_ultimos_30_dias,
+      datasets: [
+          {
+              label: 'Apellidos encontrados',
+              borderColor: 'black',
+              data: datos_scraping,
+          }
+      ]
+  };
+  // Configuración del gráfico
+  var configuracion1 = {
+      type: 'line',
+      data: datos2,
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true,
+                  min:0
+              }
+          }
+      }
+  };
+  var contexto1 = document.getElementById('graficoLinea1').getContext('2d');
+  var miGrafico1 = new Chart(contexto1, configuracion1);
+</script>
+{% endblock  %}

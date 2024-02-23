@@ -1,0 +1,71 @@
+{% extends 'apellidos/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+
+{% block contenido %}
+    <br>
+        <div class="row">
+            <div class="col">
+                <p class="fs-2 fw-bold">Ranking</p>
+                <p class="fs-4 fw-bold" style="color: gray;">{{titulo}}</p>
+            </div>
+            <div class="col d-flex justify-content-end">
+                <div class="btn-group btn-group-sm align-items-center">
+                    <a href="{% url ranking_actual_asc 1 %}" class="btn btn-primary  {{style_asc}}">Ascendente</a>
+                    <a href="{% url ranking_actual_desc 1 %}" class="btn btn-primary {{style_desc}}">Descendente</a>
+                </div>
+            </div>
+        </div>
+        
+
+ 
+    <table class="table table-hover  table-bordered">
+        <thead>
+            <tr>
+              <th scope="col">Posicion</th>
+              <th scope="col">Apellido</th>
+              <th scope="col">{{caracteristica}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in lista_elementos %}
+            <tr>
+              <td> N° {{ e.0|formato_miles }}</td>
+              <td> {{ e.1 }}</td>
+              <td> {{ e.2|formato_miles }} </td>
+            </tr>
+            {% endfor %}
+    </table>   
+    <nav aria-label="Page navigation example ">
+        <ul class="pagination justify-content-center " >
+           <li class="page-item ">
+                <a class="page-link  text-dark {% if pagina_actual == 1 %}disabled{% endif %}" href="{% url ranking_actual 1 %}" aria-label="first">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link text-dark {% if pagina_actual == 1 %}disabled{% endif %}" href="{% url ranking_actual pagina_prev %}" aria-label="Previous">
+              <span aria-hidden="true"><</span>
+            </a>
+          </li>
+          {% for e in lista_paginas %}
+            <li class="page-item {% if pagina_actual == e %}active {% endif %} ">
+              <a class="page-link {% if pagina_actual == e %}bg-dark text-white border-dark {% endif %} text-dark" href="{% url ranking_actual e %}">{{e}}</a>
+            </li>
+          {% endfor %}
+          
+
+          <li class="page-item">
+            <a class="page-link text-dark {% if pagina_actual == total_paginas %}disabled{% endif %}" href="{% url ranking_actual pagina_next %}" aria-label="Next">
+              <span aria-hidden="true">></span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link text-dark {% if pagina_actual == total_paginas  %}disabled{% endif %}" href="{% url ranking_actual total_paginas %}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li> 
+        </ul>
+      </nav> 
+{% endblock %}

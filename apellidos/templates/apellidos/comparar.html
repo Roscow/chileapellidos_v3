@@ -1,0 +1,47 @@
+{% extends 'apellidos/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block contenido %}
+<br>
+<p class="fs-1 text-center">Comparación de apellidos</p>
+
+<form id="miFormulario" method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class="mb-3 col-lg-6 col-md-12">
+            <label for="exampleInputEmail1" class="form-label">Apellido N° 1</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" name="apellido1" required  onkeypress="return /[a-zA-Z0-9-]/.test(event.key)">
+        </div>
+        <div class="mb-3 col-lg-6 col-md-12">
+            <label for="exampleInputPassword1" class="form-label">Apellido N° 2</label>
+            <input type="text" class="form-control" name="apellido2" id="exampleInputPassword1" required  onkeypress="return /[a-zA-Z0-9-]/.test(event.key)">
+        </div>
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
+    </div>
+    <button type="submit" class="btn btn-dark" id="submitBtn">Comparar</button>
+</form>
+
+<div id="spinner" class="text-center" style="display: none;">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+{% block detalle %}
+{% endblock %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    document.getElementById('miFormulario').addEventListener('submit', function() {
+        // Muestra el spinner al enviar el formulario
+        document.getElementById('spinner').style.display = 'block';
+    });
+</script>
+{% endblock %}

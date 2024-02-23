@@ -1,0 +1,48 @@
+{% extends 'apellidos/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block contenido %}
+<br>
+<p class="fs-1 text-center">Buscar datos por combinacion de apellidos</p>
+
+<form id="miFormulario" method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class="mb-3 col-lg-6 col-md-12">
+            <label for="exampleInputEmail1" class="form-label">1° Apellido</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" name="apellido1" required  onkeypress="return /[a-zA-Z0-9-]/.test(event.key)">
+        </div>
+        <div class="mb-3 col-lg-6 col-md-12">
+            <label for="exampleInputPassword1" class="form-label">2° Apellido</label>
+            <input type="text" class="form-control" name="apellido2" id="exampleInputPassword1" required  onkeypress="return /[a-zA-Z0-9-]/.test(event.key)">
+        </div>
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
+        <label class="form-check-label text-dark" for="exampleCheck1">Tener en consideración que el orden de los apellidos sí influye en los resultados de la búsqueda</label>
+    </div>
+    <button type="submit" class="btn btn-dark" id="submitBtn">Buscar</button>
+</form>
+
+<div id="spinner" class="text-center" style="display: none;">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+{% block detalle %}
+{% endblock %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    document.getElementById('miFormulario').addEventListener('submit', function() {
+        // Muestra el spinner al enviar el formulario
+        document.getElementById('spinner').style.display = 'block';
+    });
+</script>
+{% endblock %}
