@@ -559,134 +559,142 @@ def ranking_promedio_edad_desc(request,pagina):
 def combinar(request):
     if request.method == 'POST':
         try:
-            #realizar proceso en tiempo real
-            regiones_orden_geografico = (15,1,2,3,4,5,13,6,7,16,8,9,14,10,11,12,17)
-            apellido1_req = request.POST.get('apellido1', '')
-            apellido1_req = apellido1_req.lower()
-            apellido1_req = apellido1_req.capitalize()
-            apellido2_req = request.POST.get('apellido2', '')
-            apellido2_req = apellido2_req.lower()
-            apellido2_req = apellido2_req.capitalize()
-            apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
-            apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
-            apellido1_obj.save()
-            apellido2_obj = Apellido.objects.get(apellido=apellido2_req) 
-            apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
-            apellido2_obj.save()
-            #descripcion apellido1
-            if apellido1_obj.descripcion is None:
-                descripcion = obtener_origen_openai(apellido1_req)
-                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido1_req)
-                apellido1_obj.descripcion = descripcion
-                apellido1_obj.save()      
-            #descripcion apellido2
-            if apellido2_obj.descripcion is None:
-                descripcion = obtener_origen_openai(apellido2_req)
-                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido2_req)
-                apellido2_obj.descripcion = descripcion
-                apellido2_obj.save() 
-            personas_list = Persona.objects.filter(apellido1=apellido1_obj, apellido2=apellido2_obj)
-            total_personas_apellido = len(personas_list)
-            total_general_personas = Persona.objects.all().count()
-            porcentaje_apellido = round((total_personas_apellido*100)/total_general_personas, 5)
-            mujeres =0
-            hombres =0
-            edad_suma=0
-            lista_regiones = list()
-            detalle_regiones = list()
-            etario1=etario2=etario3=etario4=etario5=etario6=etario7=etario8=etario9=0
-            for p in personas_list:
-                if(p.genero == 'F'):
-                    mujeres = mujeres+1 
-                else:
-                    hombres = hombres+1
-                edad = calcular_edad(p.fecha_nacimiento_aprox)
-                edad_suma = edad + edad_suma
-                #etario 1
-                if(edad>= 18 and edad<=29 ):
-                    etario1 = etario1+1
-                #etario 2
-                if(edad>= 30 and edad<=39 ):
-                    etario2 = etario2+1     
-                #etario 3
-                if(edad>= 40 and edad<=49 ):
-                    etario3 = etario3+1     
-                #etario 4
-                if(edad>= 50 and edad<=59 ):
-                    etario4 = etario4+1
-                #etario 5
-                if(edad>= 60 and edad<=69 ):
-                    etario5 = etario5+1
-                #etario 6
-                if(edad>= 70 and edad<=79 ):
-                    etario6 = etario6+1  
-                #etario 7
-                if(edad>= 80 and edad<=89 ):
-                    etario7 = etario7+1
-                #etario 8
-                if(edad>= 90 ):
-                    etario8 = etario8+1
-                #etario 9
-                if(edad< 18 ):
-                    etario9 = etario9+1
-                #region = Direccion.objects.raw(f'SELECT obtener_region_desde_direccion({p.run});')
-                with connection.cursor() as cursor:
-                    cursor.execute(f"SELECT obtener_region_desde_direccion({p.run});")
-                    region = cursor.fetchone()[0]  # Suponiendo que la función devuelve un único valor
-                    lista_regiones.append(int(region))
-            
-            for i in regiones_orden_geografico:
-                    region_obj = Region.objects.get(id=i)
-                    romano = region_obj.numero
-                    nombre = region_obj.nombre
-                    cuenta = lista_regiones.count(i)
-                    porcentaje = round((cuenta*100)/total_personas_apellido)
-                    style_width=(f"width:{porcentaje}%;")
-                    tupla = (romano, nombre, cuenta, porcentaje, style_width)
-                    detalle_regiones.append(tupla)
-
-            porcentaje_hombre = round((hombres*100)/total_personas_apellido)
-            porcentaje_mujer  = round((mujeres*100)/total_personas_apellido)
-            promedio_edad = round(edad_suma/total_personas_apellido)
-            style_mujeres = (f"width:{porcentaje_mujer}%;")
-            style_hombres = (f"width:{porcentaje_hombre}%;") 
-            listado_etario = list()
-            listado_etario.append(etario1)
-            listado_etario.append(etario2) 
-            listado_etario.append(etario3) 
-            listado_etario.append(etario4) 
-            listado_etario.append(etario5) 
-            listado_etario.append(etario6) 
-            listado_etario.append(etario7) 
-            listado_etario.append(etario8)
-            listas_encabezados = list()
-            listas_encabezados.append('19-29')
-            listas_encabezados.append('30-39')
-            listas_encabezados.append('40-49')
-            listas_encabezados.append('50-59')
-            listas_encabezados.append('60-69')
-            listas_encabezados.append('70-79')
-            listas_encabezados.append('80-89')
-            listas_encabezados.append('90+')
-            #distribucion regional 
-
-            context = {
-                'apellido1':apellido1_obj, 
-                'apellido2':apellido2_obj,
-                'total_personas':total_personas_apellido,
-                'porcentaje_apellido':porcentaje_apellido,
-                'mujeres':mujeres,
-                'hombres':hombres,
-                'porcentaje_hombre':porcentaje_hombre,
-                'porcentaje_mujer':porcentaje_mujer,
-                'style_mujeres':style_mujeres,
-                'style_hombres':style_hombres,
-                'promedio_edad':promedio_edad,
-                'listado_etario_json':json.dumps(listado_etario),
-                'lista_encabezados_json':json.dumps(listas_encabezados),
-                'detalle_regiones':detalle_regiones
+            captcha_response = request.POST.get('g-recaptcha-response', '')
+            captcha_data = {
+                'secret': os.getenv("SECRET_KEY_CAPTCHA"),
+                'response': captcha_response
             }
-            return render(request, 'apellidos/detalle_combinacion.html', context)
+            response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=captcha_data)
+            result = response.json()
+            if result['success']:
+                #realizar proceso en tiempo real
+                regiones_orden_geografico = (15,1,2,3,4,5,13,6,7,16,8,9,14,10,11,12,17)
+                apellido1_req = request.POST.get('apellido1', '')
+                apellido1_req = apellido1_req.lower()
+                apellido1_req = apellido1_req.capitalize()
+                apellido2_req = request.POST.get('apellido2', '')
+                apellido2_req = apellido2_req.lower()
+                apellido2_req = apellido2_req.capitalize()
+                apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
+                apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
+                apellido1_obj.save()
+                apellido2_obj = Apellido.objects.get(apellido=apellido2_req) 
+                apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
+                apellido2_obj.save()
+                #descripcion apellido1
+                if apellido1_obj.descripcion is None:
+                    descripcion = obtener_origen_openai(apellido1_req)
+                    descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido1_req)
+                    apellido1_obj.descripcion = descripcion
+                    apellido1_obj.save()      
+                #descripcion apellido2
+                if apellido2_obj.descripcion is None:
+                    descripcion = obtener_origen_openai(apellido2_req)
+                    descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido2_req)
+                    apellido2_obj.descripcion = descripcion
+                    apellido2_obj.save() 
+                personas_list = Persona.objects.filter(apellido1=apellido1_obj, apellido2=apellido2_obj)
+                total_personas_apellido = len(personas_list)
+                total_general_personas = Persona.objects.all().count()
+                porcentaje_apellido = round((total_personas_apellido*100)/total_general_personas, 5)
+                mujeres =0
+                hombres =0
+                edad_suma=0
+                lista_regiones = list()
+                detalle_regiones = list()
+                etario1=etario2=etario3=etario4=etario5=etario6=etario7=etario8=etario9=0
+                for p in personas_list:
+                    if(p.genero == 'F'):
+                        mujeres = mujeres+1 
+                    else:
+                        hombres = hombres+1
+                    edad = calcular_edad(p.fecha_nacimiento_aprox)
+                    edad_suma = edad + edad_suma
+                    #etario 1
+                    if(edad>= 18 and edad<=29 ):
+                        etario1 = etario1+1
+                    #etario 2
+                    if(edad>= 30 and edad<=39 ):
+                        etario2 = etario2+1     
+                    #etario 3
+                    if(edad>= 40 and edad<=49 ):
+                        etario3 = etario3+1     
+                    #etario 4
+                    if(edad>= 50 and edad<=59 ):
+                        etario4 = etario4+1
+                    #etario 5
+                    if(edad>= 60 and edad<=69 ):
+                        etario5 = etario5+1
+                    #etario 6
+                    if(edad>= 70 and edad<=79 ):
+                        etario6 = etario6+1  
+                    #etario 7
+                    if(edad>= 80 and edad<=89 ):
+                        etario7 = etario7+1
+                    #etario 8
+                    if(edad>= 90 ):
+                        etario8 = etario8+1
+                    #etario 9
+                    if(edad< 18 ):
+                        etario9 = etario9+1
+                    #region = Direccion.objects.raw(f'SELECT obtener_region_desde_direccion({p.run});')
+                    with connection.cursor() as cursor:
+                        cursor.execute(f"SELECT obtener_region_desde_direccion({p.run});")
+                        region = cursor.fetchone()[0]  # Suponiendo que la función devuelve un único valor
+                        lista_regiones.append(int(region))
+                
+                for i in regiones_orden_geografico:
+                        region_obj = Region.objects.get(id=i)
+                        romano = region_obj.numero
+                        nombre = region_obj.nombre
+                        cuenta = lista_regiones.count(i)
+                        porcentaje = round((cuenta*100)/total_personas_apellido)
+                        style_width=(f"width:{porcentaje}%;")
+                        tupla = (romano, nombre, cuenta, porcentaje, style_width)
+                        detalle_regiones.append(tupla)
+
+                porcentaje_hombre = round((hombres*100)/total_personas_apellido)
+                porcentaje_mujer  = round((mujeres*100)/total_personas_apellido)
+                promedio_edad = round(edad_suma/total_personas_apellido)
+                style_mujeres = (f"width:{porcentaje_mujer}%;")
+                style_hombres = (f"width:{porcentaje_hombre}%;") 
+                listado_etario = list()
+                listado_etario.append(etario1)
+                listado_etario.append(etario2) 
+                listado_etario.append(etario3) 
+                listado_etario.append(etario4) 
+                listado_etario.append(etario5) 
+                listado_etario.append(etario6) 
+                listado_etario.append(etario7) 
+                listado_etario.append(etario8)
+                listas_encabezados = list()
+                listas_encabezados.append('19-29')
+                listas_encabezados.append('30-39')
+                listas_encabezados.append('40-49')
+                listas_encabezados.append('50-59')
+                listas_encabezados.append('60-69')
+                listas_encabezados.append('70-79')
+                listas_encabezados.append('80-89')
+                listas_encabezados.append('90+')
+                #distribucion regional 
+
+                context = {
+                    'apellido1':apellido1_obj, 
+                    'apellido2':apellido2_obj,
+                    'total_personas':total_personas_apellido,
+                    'porcentaje_apellido':porcentaje_apellido,
+                    'mujeres':mujeres,
+                    'hombres':hombres,
+                    'porcentaje_hombre':porcentaje_hombre,
+                    'porcentaje_mujer':porcentaje_mujer,
+                    'style_mujeres':style_mujeres,
+                    'style_hombres':style_hombres,
+                    'promedio_edad':promedio_edad,
+                    'listado_etario_json':json.dumps(listado_etario),
+                    'lista_encabezados_json':json.dumps(listas_encabezados),
+                    'detalle_regiones':detalle_regiones
+                }
+                return render(request, 'apellidos/detalle_combinacion.html', context)
         except Exception as e:
             context = {'error':'No se encontraron resultados'}
             return render(request, 'apellidos/error.html', context)
