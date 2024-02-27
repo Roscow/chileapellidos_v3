@@ -695,8 +695,11 @@ def combinar(request):
                     'detalle_regiones':detalle_regiones
                 }
                 return render(request, 'apellidos/detalle_combinacion.html', context)
+            else:
+                context = {'error':'captcha incorrecto'}
+                return render(request, 'apellidos/error.html', context)        
         except Exception as e:
-            context = {'error':'No se encontraron resultados'}
+            context = {'error':e}
             return render(request, 'apellidos/error.html', context)
     else:
         context = {}
@@ -707,113 +710,124 @@ def comparar(request):
     error="no se encontraron resultados del apellido. "
     if request.method == 'POST':
         try:
-            total_general_personas = Persona.objects.all().count()
-            apellido1_req = request.POST.get('apellido1', '')
-            apellido1_req = apellido1_req.lower()
-            apellido1_req = apellido1_req.capitalize()
-            apellido2_req = request.POST.get('apellido2', '')
-            apellido2_req = apellido2_req.lower()
-            apellido2_req = apellido2_req.capitalize()
-            apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
-            apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
-            apellido1_obj.save()
-            apellido2_obj = Apellido.objects.get(apellido=apellido2_req)
-            apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
-            apellido2_obj.save()
-            porcentaje_apellido1 = round((apellido1_obj.cuenta*100) /  total_general_personas ,5  ) 
-            porcentaje_apellido2 = round((apellido2_obj.cuenta*100) /  total_general_personas ,5 )  
-            apellido1_porcentaje_mujer = round ((apellido1_obj.mujeres*100)/apellido1_obj.cuenta , 1)
-            apellido1_porcentaje_hombre =round ((apellido1_obj.hombres*100)/apellido1_obj.cuenta , 1)
-            apellido2_porcentaje_mujer = round ((apellido2_obj.mujeres*100)/apellido2_obj.cuenta , 1)
-            apellido2_porcentaje_hombre =round ((apellido2_obj.hombres*100)/apellido2_obj.cuenta , 1)
-            style1_mujeres = (f"width:{apellido1_porcentaje_mujer}%;")
-            style1_hombres = (f"width:{apellido1_porcentaje_hombre}%;")
-            style2_mujeres = (f"width:{apellido2_porcentaje_mujer}%;")
-            style2_hombres = (f"width:{apellido2_porcentaje_hombre}%;")
-            #descripcion
-            if apellido1_obj.descripcion is None:
-                descripcion = obtener_origen_openai(apellido1_req)
-                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido1_req)
-                apellido1_obj.descripcion = descripcion
-                apellido1_obj.save()      
-            #descripcion apellido2
-            if apellido2_obj.descripcion is None:
-                descripcion = obtener_origen_openai(apellido2_req)
-                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido2_req)
-                apellido2_obj.descripcion = descripcion
-                apellido2_obj.save() 
-            #histogramas 
-            listas_encabezados = list()
-            listas_encabezados.append('19-29')
-            listas_encabezados.append('30-39')
-            listas_encabezados.append('40-49')
-            listas_encabezados.append('50-59')
-            listas_encabezados.append('60-69')
-            listas_encabezados.append('70-79')
-            listas_encabezados.append('80-89')
-            listas_encabezados.append('90+')
-            listado_etario1 = list()
-            listado_etario1.append(apellido1_obj.etario1)
-            listado_etario1.append(apellido1_obj.etario2)
-            listado_etario1.append(apellido1_obj.etario3)
-            listado_etario1.append(apellido1_obj.etario4)
-            listado_etario1.append(apellido1_obj.etario5)
-            listado_etario1.append(apellido1_obj.etario6)
-            listado_etario1.append(apellido1_obj.etario7)
-            listado_etario1.append(apellido1_obj.etario8)
-            listado_etario2 = list()
-            listado_etario2.append(apellido2_obj.etario1)
-            listado_etario2.append(apellido2_obj.etario2)
-            listado_etario2.append(apellido2_obj.etario3)
-            listado_etario2.append(apellido2_obj.etario4)
-            listado_etario2.append(apellido2_obj.etario5)
-            listado_etario2.append(apellido2_obj.etario6)
-            listado_etario2.append(apellido2_obj.etario7)
-            listado_etario2.append(apellido2_obj.etario8)
-            #distribucion regional
-            regiones_orden_geografico = (15,1,2,3,4,5,13,6,7,16,8,9,14,10,11,12,17)
-            contador_region1 = RegionApellido.objects.filter(apellido=apellido1_obj)
-            contador_region2 = RegionApellido.objects.filter(apellido=apellido2_obj)
-            detalle_regiones3=list()
-            for i in regiones_orden_geografico:
-                region_obj = Region.objects.get(id=i)
-                romano = region_obj.numero
-                nombre = region_obj.nombre
-                #apellido1
-                region_apellido_elemento1 = contador_region1.get(region=region_obj.id)
-                region_apellido1 = region_apellido_elemento1
-                contador_r1 = region_apellido1.cuenta
-                porcentaje1 = int(contador_r1* 100)/(apellido1_obj.cuenta)
-                style_width1=(f"width:{porcentaje1}%;")
-                #apellido2
-                region_apellido_elemento2 = contador_region2.get(region=region_obj.id)
-                region_apellido2 = region_apellido_elemento2
-                contador_r2 = region_apellido2.cuenta
-                porcentaje2 = int(contador_r2* 100)/(apellido2_obj.cuenta)
-                style_width2=(f"width:{porcentaje2}%;")
-                #armar tupla
-                tupla = (romano, nombre, porcentaje1, style_width1, porcentaje2, style_width2)
-                detalle_regiones3.append(tupla)   
-            
-            context = {
-                'apellido1_obj':apellido1_obj,
-                'apellido2_obj':apellido2_obj,
-                'porcentaje_apellido1':porcentaje_apellido1,
-                'porcentaje_apellido2':porcentaje_apellido2,
-                'apellido1_porcentaje_mujer':apellido1_porcentaje_mujer,
-                'apellido1_porcentaje_hombre':apellido1_porcentaje_hombre,
-                'apellido2_porcentaje_mujer':apellido2_porcentaje_mujer,
-                'apellido2_porcentaje_hombre':apellido2_porcentaje_hombre,
-                'style1_mujeres':style1_mujeres,
-                'style1_hombres':style1_hombres,
-                'style2_mujeres':style2_mujeres,
-                'style2_hombres':style2_hombres,
-                'listado_etario1_json':json.dumps(listado_etario1),
-                'listado_etario2_json':json.dumps(listado_etario2),
-                'lista_encabezados_json':json.dumps(listas_encabezados),
-                'detalle_regiones3':detalle_regiones3
-                }
-            return render(request, 'apellidos/detalle_comparacion.html', context)
+            captcha_response = request.POST.get('g-recaptcha-response', '')
+            captcha_data = {
+                'secret': os.getenv("SECRET_KEY_CAPTCHA"),
+                'response': captcha_response
+            }
+            response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=captcha_data)
+            result = response.json()
+            if result['success']:
+                total_general_personas = Persona.objects.all().count()
+                apellido1_req = request.POST.get('apellido1', '')
+                apellido1_req = apellido1_req.lower()
+                apellido1_req = apellido1_req.capitalize()
+                apellido2_req = request.POST.get('apellido2', '')
+                apellido2_req = apellido2_req.lower()
+                apellido2_req = apellido2_req.capitalize()
+                apellido1_obj = Apellido.objects.get(apellido=apellido1_req)
+                apellido1_obj.cuenta_busqueda = int(apellido1_obj.cuenta_busqueda) + 1
+                apellido1_obj.save()
+                apellido2_obj = Apellido.objects.get(apellido=apellido2_req)
+                apellido2_obj.cuenta_busqueda = int(apellido2_obj.cuenta_busqueda) + 1
+                apellido2_obj.save()
+                porcentaje_apellido1 = round((apellido1_obj.cuenta*100) /  total_general_personas ,5  ) 
+                porcentaje_apellido2 = round((apellido2_obj.cuenta*100) /  total_general_personas ,5 )  
+                apellido1_porcentaje_mujer = round ((apellido1_obj.mujeres*100)/apellido1_obj.cuenta , 1)
+                apellido1_porcentaje_hombre =round ((apellido1_obj.hombres*100)/apellido1_obj.cuenta , 1)
+                apellido2_porcentaje_mujer = round ((apellido2_obj.mujeres*100)/apellido2_obj.cuenta , 1)
+                apellido2_porcentaje_hombre =round ((apellido2_obj.hombres*100)/apellido2_obj.cuenta , 1)
+                style1_mujeres = (f"width:{apellido1_porcentaje_mujer}%;")
+                style1_hombres = (f"width:{apellido1_porcentaje_hombre}%;")
+                style2_mujeres = (f"width:{apellido2_porcentaje_mujer}%;")
+                style2_hombres = (f"width:{apellido2_porcentaje_hombre}%;")
+                #descripcion
+                if apellido1_obj.descripcion is None:
+                    descripcion = obtener_origen_openai(apellido1_req)
+                    descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido1_req)
+                    apellido1_obj.descripcion = descripcion
+                    apellido1_obj.save()      
+                #descripcion apellido2
+                if apellido2_obj.descripcion is None:
+                    descripcion = obtener_origen_openai(apellido2_req)
+                    descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido2_req)
+                    apellido2_obj.descripcion = descripcion
+                    apellido2_obj.save() 
+                #histogramas 
+                listas_encabezados = list()
+                listas_encabezados.append('19-29')
+                listas_encabezados.append('30-39')
+                listas_encabezados.append('40-49')
+                listas_encabezados.append('50-59')
+                listas_encabezados.append('60-69')
+                listas_encabezados.append('70-79')
+                listas_encabezados.append('80-89')
+                listas_encabezados.append('90+')
+                listado_etario1 = list()
+                listado_etario1.append(apellido1_obj.etario1)
+                listado_etario1.append(apellido1_obj.etario2)
+                listado_etario1.append(apellido1_obj.etario3)
+                listado_etario1.append(apellido1_obj.etario4)
+                listado_etario1.append(apellido1_obj.etario5)
+                listado_etario1.append(apellido1_obj.etario6)
+                listado_etario1.append(apellido1_obj.etario7)
+                listado_etario1.append(apellido1_obj.etario8)
+                listado_etario2 = list()
+                listado_etario2.append(apellido2_obj.etario1)
+                listado_etario2.append(apellido2_obj.etario2)
+                listado_etario2.append(apellido2_obj.etario3)
+                listado_etario2.append(apellido2_obj.etario4)
+                listado_etario2.append(apellido2_obj.etario5)
+                listado_etario2.append(apellido2_obj.etario6)
+                listado_etario2.append(apellido2_obj.etario7)
+                listado_etario2.append(apellido2_obj.etario8)
+                #distribucion regional
+                regiones_orden_geografico = (15,1,2,3,4,5,13,6,7,16,8,9,14,10,11,12,17)
+                contador_region1 = RegionApellido.objects.filter(apellido=apellido1_obj)
+                contador_region2 = RegionApellido.objects.filter(apellido=apellido2_obj)
+                detalle_regiones3=list()
+                for i in regiones_orden_geografico:
+                    region_obj = Region.objects.get(id=i)
+                    romano = region_obj.numero
+                    nombre = region_obj.nombre
+                    #apellido1
+                    region_apellido_elemento1 = contador_region1.get(region=region_obj.id)
+                    region_apellido1 = region_apellido_elemento1
+                    contador_r1 = region_apellido1.cuenta
+                    porcentaje1 = int(contador_r1* 100)/(apellido1_obj.cuenta)
+                    style_width1=(f"width:{porcentaje1}%;")
+                    #apellido2
+                    region_apellido_elemento2 = contador_region2.get(region=region_obj.id)
+                    region_apellido2 = region_apellido_elemento2
+                    contador_r2 = region_apellido2.cuenta
+                    porcentaje2 = int(contador_r2* 100)/(apellido2_obj.cuenta)
+                    style_width2=(f"width:{porcentaje2}%;")
+                    #armar tupla
+                    tupla = (romano, nombre, porcentaje1, style_width1, porcentaje2, style_width2)
+                    detalle_regiones3.append(tupla)   
+                
+                context = {
+                    'apellido1_obj':apellido1_obj,
+                    'apellido2_obj':apellido2_obj,
+                    'porcentaje_apellido1':porcentaje_apellido1,
+                    'porcentaje_apellido2':porcentaje_apellido2,
+                    'apellido1_porcentaje_mujer':apellido1_porcentaje_mujer,
+                    'apellido1_porcentaje_hombre':apellido1_porcentaje_hombre,
+                    'apellido2_porcentaje_mujer':apellido2_porcentaje_mujer,
+                    'apellido2_porcentaje_hombre':apellido2_porcentaje_hombre,
+                    'style1_mujeres':style1_mujeres,
+                    'style1_hombres':style1_hombres,
+                    'style2_mujeres':style2_mujeres,
+                    'style2_hombres':style2_hombres,
+                    'listado_etario1_json':json.dumps(listado_etario1),
+                    'listado_etario2_json':json.dumps(listado_etario2),
+                    'lista_encabezados_json':json.dumps(listas_encabezados),
+                    'detalle_regiones3':detalle_regiones3
+                    }
+                return render(request, 'apellidos/detalle_comparacion.html', context)
+            else:
+                context = {'error':'captcha incorrecto'}
+                return render(request, 'apellidos/error.html', context)   
         except Exception as e:
             error = error + ' ' + str(e)
             context = {'error':error}
