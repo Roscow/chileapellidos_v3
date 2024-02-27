@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase
 import random
 from django.db.models import Q
+from django.views import View
+
 import json
 from django.http import HttpResponse
 import math
@@ -10,6 +12,7 @@ from django.db import connection
 import requests
 from dotenv import load_dotenv
 import os
+from django.core.mail import EmailMessage
 
 load_dotenv()
 
@@ -1241,4 +1244,24 @@ def detalle_apellido2(request,apellido):
     except Exception as e:
         context = {'error':e}
         return render(request, 'apellidos/error.html',context)
-     
+
+def solicitud_revision(request):  
+    if request.method == 'POST':
+        try:
+            apellido = request.POST.get('input_apellido', '')
+            send_email(apellido)
+            return redirect('index')
+        except Exception as e:
+            context = {'error':e}
+            return render(request, 'apellidos/error.html', context)
+
+#creacion del correo
+def send_email(apellido):
+    email = EmailMessage(
+        subject=f'Solicitud de revision en: {apellido}',
+        body=f'Se ha solicitado revisar los datos del apelliedo {apellido}',
+        from_email='nicolas.valdeslobos@gmail.com',
+        to=['nicolas.valdes@live.com'],
+    )   
+    email.send()
+

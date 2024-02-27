@@ -98,7 +98,19 @@
       
           </table>  
       </div>
-    </div>    
+    </div> 
+    
+    <div class="row">
+      <div class="col-12">
+        <form method="post" action="{% url 'solicitud_revision' %}" id="emailMe">
+          {% csrf_token %}
+          <input type="hidden" name="input_apellido" value="{{apellido.apellido}}">
+          <label for="">¿Encontraste algun error en los datos? solicita una revision</label><br>
+          <input class="btn btn-warning" type="submit" value="Solicitar revision" >	
+        </form>
+        <br>
+      </div>
+    </div>
     
 {% endblock %}
 

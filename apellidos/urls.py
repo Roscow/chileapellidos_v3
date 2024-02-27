@@ -16,5 +16,6 @@ urlpatterns = [
     path('ranking_mas_buscados_asc/<int:pagina>', views.ranking_mas_buscados_asc, name='ranking_mas_buscados_asc'),  
     path('ranking_mas_buscados_desc/<int:pagina>', views.ranking_mas_buscados_desc, name='ranking_mas_buscados_desc'), 
     path('detalle_apellido2/<str:apellido>', views.detalle_apellido2, name='detalle_apellido2'),  
+    path('solicitud_revision', views.solicitud_revision, name='solicitud_revision'),  
 
 ]       
