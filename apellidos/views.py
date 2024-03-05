@@ -1014,8 +1014,9 @@ def ranking_mas_buscados_desc(request,pagina):
         inicio = (num_elementos * (pagina -1))
         fin = num_elementos * pagina 
         #apellidos = Apellido.objects.all().order_by('-cuenta_busqueda')[inicio:fin]
+        apellidos_todos = Apellido.objects.exclude(cuenta_busqueda=0).count()
         apellidos = Apellido.objects.exclude(cuenta_busqueda=0).order_by('-cuenta_busqueda')[inicio:fin]
-        total_apellidos = len(apellidos)
+        total_apellidos = apellidos_todos
         contador = inicio
         caracteristica='Busquedas'
         ranking_actual_desc = 'ranking_mas_buscados_desc'
@@ -1032,7 +1033,7 @@ def ranking_mas_buscados_desc(request,pagina):
         pagina_prev = pagina-1
         pagina_next = pagina+1
         lista_paginas = list()
-        if(pagina>=3 and pagina<=(total_paginas-2)):
+        if((pagina>=3 and pagina<=(total_paginas-2))) :
             lista_paginas.append(pagina-2)
             lista_paginas.append(pagina-1)
             lista_paginas.append(pagina)
@@ -1087,6 +1088,7 @@ def ranking_mas_buscados_desc(request,pagina):
     except Exception as e:
         context = {'error':e}
         return render(request, 'apellidos/error.html', context)
+
 
 def ranking_mas_buscados_asc(request,pagina):
     try:
@@ -1171,7 +1173,6 @@ def ranking_mas_buscados_asc(request,pagina):
         context = {'error':e}
         return render(request, 'apellidos/error.html', context)
  
-
 def detalle_apellido2(request,apellido):
     try:
         apellido_p = apellido
