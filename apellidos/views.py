@@ -1014,8 +1014,8 @@ def ranking_mas_buscados_desc(request,pagina):
         inicio = (num_elementos * (pagina -1))
         fin = num_elementos * pagina 
         #apellidos = Apellido.objects.all().order_by('-cuenta_busqueda')[inicio:fin]
-        apellidos_todos = Apellido.objects.exclude(cuenta_busqueda=0).count()
         apellidos = Apellido.objects.exclude(cuenta_busqueda=0).order_by('-cuenta_busqueda')[inicio:fin]
+        apellidos_todos = Apellido.objects.exclude(cuenta_busqueda=0).count()
         total_apellidos = apellidos_todos
         contador = inicio
         caracteristica='Busquedas'
@@ -1100,7 +1100,8 @@ def ranking_mas_buscados_asc(request,pagina):
         fin = num_elementos * pagina 
         #apellidos = Apellido.objects.all().order_by('-cuenta_busqueda')[inicio:fin]
         apellidos = Apellido.objects.exclude(cuenta_busqueda=0).order_by('cuenta_busqueda')[inicio:fin]
-        total_apellidos = len(apellidos)
+        apellidos_todos = Apellido.objects.exclude(cuenta_busqueda=0).count()
+        total_apellidos = apellidos_todos
         contador = inicio
         caracteristica='Busquedas'
         ranking_actual_desc = 'ranking_mas_buscados_desc'
