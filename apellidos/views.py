@@ -3,7 +3,8 @@ from .models import Persona, Apellido, Region, RegionApellido, Direccion , Estad
 import random
 from django.db.models import Q
 from django.views import View
-
+import unicodedata
+import re
 import json
 from django.http import HttpResponse
 import math
@@ -15,6 +16,18 @@ import os
 from django.core.mail import EmailMessage
 
 load_dotenv()
+
+
+
+def remover_tildes(cadena):
+    # Usar la librería unicodedata para normalizar la cadena y eliminar los caracteres acentuados
+    cadena_sin_tildes = ''.join((c for c in unicodedata.normalize('NFD', cadena) if unicodedata.category(c) != 'Mn'))
+    return cadena_sin_tildes
+
+def reemplazar_tildes(cadena):
+    # Usar una expresión regular para encontrar caracteres con tilde
+    cadena_sin_tildes = re.sub(r'[áéíóúÁÉÍÓÚ]', lambda x: remover_tildes(x.group()), cadena)
+    return cadena_sin_tildes
 
 def invertir_queryset(queryset):
     # Convierte el queryset en una lista y luego inviértela
@@ -176,6 +189,8 @@ def detalle_apellido(request):
             apellido_p = apellido_p.lower()
             apellido_p = apellido_p.capitalize()
             apellido_p = apellido_p.strip()
+            apellido_p = reemplazar_tildes(apellido_p)
+
             total_personas = Persona.objects.all().count()  #esto deberia estar en una tabla para no calcularlo con cada consulta 
             apellido_obj = Apellido.objects.get(apellido=apellido_p)
             apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1

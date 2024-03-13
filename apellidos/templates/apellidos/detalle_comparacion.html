@@ -21,9 +21,9 @@
 <hr>
 <p class="fs-3 text-center">Datos generales</p>
 <div class="row">
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-6 col-md-6" style="text-align: center;">
+      <caption > {{apellido1_obj.apellido}} </caption>
         <table class="table table-hover table-bordered caption-top table-primary">
-          <caption > {{apellido1_obj.apellido}} </caption>
             <thead>
               <th>Indicador</th>
               <th>Valor</th>
@@ -63,9 +63,10 @@
             </tr>
         </table> 
     </div>
-    <div class="col-lg-6 col-md-6">        
+    <div class="col-lg-6 col-md-6" style="text-align: center;">   
+      <caption > {{apellido2_obj.apellido}} </caption>
+     
         <table class="table table-hover table-bordered caption-top table-danger">
-          <caption > {{apellido2_obj.apellido}} </caption>
               <thead>
                 <th>Indicador</th>
                 <th>Valor</th>
@@ -110,28 +111,27 @@
 <hr>
 <p class="fs-3 text-center">Etario</p>
 <div class="row">
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-6 col-md-6" style="text-align: center;">
       <caption > {{apellido1_obj.apellido}} </caption>
         <canvas id="histogramaEdades1" width="100%" height="50%"></canvas>
     </div>
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-6 col-md-6" style="text-align: center;"  >
       <caption > {{apellido2_obj.apellido}} </caption>
         <canvas id="histogramaEdades2" width="100%" height="50%"></canvas>
     </div>
 </div>
 <br>
 <hr>
-<p class="fs-3 text-center">Distribucion regional</p>
+<p class="fs-3 text-center">Distribución regional</p>
 
 <div class="row">
     <table class="table table-bordered caption-top">
-        <caption>Distribucion regional</caption>
           <thead>
           <tr>
               <th scope="col" class="text-end">Porc.1</th>
               <th scope="col" class="text-end">{{apellido1_obj.apellido}} </th>
               <th class="text-end">N°</th>
-              <th  class="d-none d-sm-table-cell text-center">Region</th>
+              <th  class="d-none d-sm-table-cell text-center">Región</th>
               <th scope="col">{{apellido2_obj.apellido}}</th>
               <th scope="col">Porc.2</th>
           </tr>
@@ -173,7 +173,7 @@
     var datos = {
         labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
         datasets: [{
-            label: 'Número de personas',
+            label: 'Distribución etaria',
             data:listado_etario1,
             backgroundColor: 'rgba(0, 0, 255, 0.3)',
             borderColor: 'rgba(255, 99, 132, 1)',
@@ -201,7 +201,7 @@
                     reverse: true,
                     title: {
                       display: true,
-                      text: 'Numero de personas'
+                      text: 'Número de personas'
                     }
                 }
             }
@@ -221,7 +221,7 @@
     var datos = {
         labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
         datasets: [{
-            label: 'Número de personas',
+            label: 'Distribución etaria',
             data:listado_etario2,
             backgroundColor: 'rgba(255, 99, 132, 0.3)',
             borderColor: 'rgba(255, 99, 132, 1)',
@@ -249,7 +249,7 @@
                     reverse: true,
                     title: {
                       display: true,
-                      text: 'Numero de personas'
+                      text: 'Número de personas'
                     }
                 }
             }

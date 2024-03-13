@@ -13,9 +13,9 @@
     <br>
     <hr>
     <div class="row">
-      <div class="col-lg-6 col-md-12">
+      <div class="col-lg-6 col-md-12" style="text-align: center;">
+        <caption >Datos generales</caption>
           <table class="table table-hover table-bordered caption-top">
-            <caption >Datos generales</caption>
               <thead>
                 <th>Indicador</th>
                 <th>Valor</th>
@@ -60,17 +60,16 @@
           </table> 
 
       </div>
-      <div class="col-lg-6 col-md-12">
-        <caption>Grafico de rangos etarios</caption>
+      <div class="col-lg-6 col-md-12" style="text-align: center;">
+        <caption>Gráfico de rangos etarios</caption>
         <canvas id="histogramaEdades" width="100%" height="50%"></canvas>
       </div>
     </div> 
     <hr>
     <div class="row">
-      <div class="col-lg-12 col-md-12">
-        
+      <div class="col-lg-12 col-md-12" style="text-align: center;">
+        <caption>Distribución regional</caption>
           <table class="table table-bordered caption-top">
-            <caption>Distribucion regional</caption>
               <thead>
               <tr>
                   <th scope="col">N°</th>
@@ -105,8 +104,8 @@
         <form method="post" action="{% url 'solicitud_revision' %}" id="emailMe">
           {% csrf_token %}
           <input type="hidden" name="input_apellido" value="{{apellido.apellido}}">
-          <label for="">¿Encontraste algun error en los datos? solicita una revision</label><br>
-          <input class="btn btn-warning" type="submit" value="Solicitar revision" >	
+          <label for="">¿Encontraste algún error en los datos? solicita una revisión</label><br>
+          <input class="btn btn-warning" type="submit" value="Solicitar revisión" >	
         </form>
         <br>
       </div>
@@ -126,7 +125,7 @@
     var datos = {
         labels: [ '18-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'],
         datasets: [{
-            label: 'Número de personas',
+            label: 'Distribución por edad',
             data:listado_etario,
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderColor: 'rgba(255, 99, 132, 1)',
