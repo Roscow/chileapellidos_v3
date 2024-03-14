@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 
 urlpatterns = [
@@ -18,4 +20,4 @@ urlpatterns = [
     path('detalle_apellido2/<str:apellido>', views.detalle_apellido2, name='detalle_apellido2'),  
     path('solicitud_revision', views.solicitud_revision, name='solicitud_revision'),  
 
-]       
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
