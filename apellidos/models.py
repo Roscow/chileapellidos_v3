@@ -199,6 +199,8 @@ class EstadoBase(models.Model):
     etario7 = models.FloatField(blank=True, null=True)
     etario8 = models.FloatField(blank=True, null=True)
     etario9 = models.FloatField(blank=True, null=True)
+    dif_personas =  models.IntegerField(blank=True, null=True)
+    dif_apellidos =  models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

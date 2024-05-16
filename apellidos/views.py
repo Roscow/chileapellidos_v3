@@ -159,8 +159,8 @@ def index(request):
     lista_cuenta_apellidos = list()
     lista_invertida = invertir_queryset(ultimos_30_estados)
     for e in lista_invertida:
-        listado_cuenta.append(e.cuenta_personas)
-        lista_cuenta_apellidos.append(e.cuenta_apellidos)
+        listado_cuenta.append(e.dif_personas)
+        lista_cuenta_apellidos.append(e.dif_apellidos)
         listado_dias.append(e.fecha.strftime('%d-%m'))
     context = {
         'estado_mas_reciente':estado_mas_reciente,
@@ -1265,18 +1265,19 @@ def detalle_apellido2(request,apellido):
 def solicitud_revision(request):  
     if request.method == 'POST':
         try:
-            apellido = request.POST.get('input_apellido', '')
-            send_email(apellido)
+            apellido = request.POST.get('input_apellido', '')            
+            mensaje = request.POST.get('mensaje','')
+            send_email(apellido,mensaje)
             return redirect('index')
         except Exception as e:
             context = {'error':e}
             return render(request, 'apellidos/error.html', context)
 
 #creacion del correo
-def send_email(apellido):
+def send_email(apellido, mensaje):
     email = EmailMessage(
         subject=f'Solicitud de revision en: {apellido}',
-        body=f'Se ha solicitado revisar los datos del apelliedo {apellido}',
+        body=f'Se ha solicitado revisar los datos del apelliedo {apellido}. Mensaje: {mensaje}',
         from_email='nicolas.valdeslobos@gmail.com',
         to=['nicolas.valdes@live.com'],
     )   

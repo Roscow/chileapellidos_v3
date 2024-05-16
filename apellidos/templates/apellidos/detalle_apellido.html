@@ -105,6 +105,7 @@
           {% csrf_token %}
           <input type="hidden" name="input_apellido" value="{{apellido.apellido}}">
           <label for="">¿Encontraste algún error en los datos? solicita una revisión</label><br>
+          <textarea name="mensaje" id="mensaje" rows="4" cols="50" placeholder="Escribe aquí tu mensaje..."></textarea><br>
           <input class="btn btn-warning" type="submit" value="Solicitar revisión" >	
         </form>
         <br>
