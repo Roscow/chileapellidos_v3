@@ -70,7 +70,7 @@
               
             </ul>
             <form class="d-none d-lg-flex" role="search" method="GET" action="{% url 'detalle_apellido' %}">
-                <input class="form-control me-2" type="text" placeholder="Apellido" aria-label="Search" name="apellido_p" onkeypress="return /[a-zA-Z0-9\s-]/.test(event.key)">
+                <input class="form-control me-2" type="text" placeholder="Apellido" aria-label="Search" name="apellido_p" onkeypress="return /[a-zA-Z0-9ñÑ\s-]/.test(event.key)">
                 <button class="btn btn-light text-dark" type="submit">Buscar</button>
             </form>
         </div>
