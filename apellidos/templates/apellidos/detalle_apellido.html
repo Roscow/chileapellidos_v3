@@ -109,7 +109,61 @@
           </table>  
       </div>
     </div> 
-    
+    <h3>Comentarios</h3>
+    {% if comentarios %}
+        {% for c in comentarios %}
+        <div class="comentario-container" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+            <div class="comentario-titulo"><strong><i>{{ c.titulo }}</i></strong></div>
+            <div class="comentario-cuerpo">{{ c.cuerpo }}</div>
+            <div class="comentario-fecha" style="font-size: 12px;">Por "<span style="color: gray;"><i>{{ c.usuario }}</i></span>" el {{ c.fecha|date:"Y-m-d" }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-comentarios" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+            <p>No hay comentarios todavía. Sé el primero en comentar!</p>
+        </div>
+    {% endif %}
+    <br>
+  <h4>Nuevo comentario</h4>
+    <div id="form-container" style="border: 1px solid #ddd; padding: 20px; border-radius: 5px;">
+      <form action="{% url 'detalle_apellido' %}" method="post">
+          {% csrf_token %}
+          <div style="margin-bottom: 15px;">
+              <input type="text" id="usuario" name="usuario" required placeholder="Usuario" 
+                     style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+          </div>
+          <input type="hidden" name="apellido_id" value="{{ apellido.id }}">
+          <div style="margin-bottom: 15px;">
+              <input type="text" id="titulo" name="titulo" required placeholder="Título" 
+                     style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+              <textarea id="cuerpo" name="cuerpo" required placeholder="Escribe aquí tu comentario" 
+                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; height: 100px;"></textarea>
+          </div>
+          <button type="submit" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;">Enviar comentario</button>
+      </form>
+  </div>
+  
+ <!--
+
+    <div id="form-container">
+      <form action="{% url 'detalle_apellido' %}" method="post">
+          {% csrf_token %}
+          <input type="text" id="usuario" name="usuario" required placeholder="Usuario">
+          <br>
+          <input type="hidden" name="apellido_id" value="{{ apellido.id }}">
+          <br>
+          <input type="text" id="titulo" name="titulo" required  placeholder="Titulo">
+          <br>
+          <textarea id="cuerpo" name="cuerpo" required placeholder="Escribe aqui tu comentario"></textarea>
+          <br>
+          <button type="submit">Enviar comentario</button>
+          <br>
+        </form>
+    </div>
+
+ 
     <div class="row">
       <div class="col-12">
         <form method="post" action="{% url 'solicitud_revision' %}" id="emailMe">
@@ -122,7 +176,7 @@
         <br>
       </div>
     </div>
-    
+    -->
 {% endblock %}
 
 
@@ -175,4 +229,16 @@
     // Crear el histograma
     var miHistograma = new Chart(ctx, configuracion);
   </script>
+
+  <script>
+    function toggleForm() {
+        var formContainer = document.getElementById('form-container');
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+        } else {
+            formContainer.style.display = 'none';
+        }
+    }
+  </script>
+
 {% endblock  %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase
+from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase , Comentario
 import random
 from django.db.models import Q
 from django.views import View
@@ -14,6 +14,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from django.core.mail import EmailMessage
+from django.utils import timezone
 
 load_dotenv()
 
@@ -183,6 +184,31 @@ def calcular_edad(fecha_nacimiento):
     return edad
 
 def detalle_apellido(request):
+    if request.method == 'POST':
+        try:
+            apellido_p = request.POST.get('apellido_id', None)
+            apellido_p = apellido_p.lower()
+            apellido_p = apellido_p.capitalize()
+            apellido_p = apellido_p.strip()
+            apellido_p = reemplazar_tildes(apellido_p)
+            apellido_obj = Apellido.objects.get(id=apellido_p)
+            usuario = request.POST.get('usuario')
+            titulo = request.POST.get('titulo')
+            cuerpo = request.POST.get('cuerpo')
+            nuevo_comentario = Comentario(
+                    apellido=apellido_obj,
+                    usuario=usuario,
+                    titulo=titulo,
+                    cuerpo=cuerpo,
+                    fecha=timezone.now()
+                )
+            nuevo_comentario.save()
+            print("se creo un nuevo comentario")
+            return redirect(request.path_info + '?apellido_p=' + apellido_obj.apellido)
+        except Exception as E:
+            print(f"error creando comentario: {E}")
+               
+    
     if 'apellido_p' in request.GET:
         try:
             apellido_p = request.GET['apellido_p']
@@ -241,6 +267,7 @@ def detalle_apellido(request):
             listas_encabezados.append('70-79')
             listas_encabezados.append('80-89')
             listas_encabezados.append('90+')
+            comentarios = Comentario.objects.filter(apellido_id=apellido_obj).order_by('-fecha')
             context = {
                 'apellido':apellido_obj, 
                 'detalle_regiones':detalle_regiones,
@@ -252,6 +279,7 @@ def detalle_apellido(request):
                 'listado_etario_json':json.dumps(listado_etario),
                 'lista_encabezados_json':json.dumps(listas_encabezados),
                 'edad_promedio':edad_promedio,
+                'comentarios': comentarios   
                 }
             return render(request, 'apellidos/detalle_apellido.html',context)
         except Exception as e:
@@ -315,6 +343,8 @@ def ranking_cantidad_asc(request,pagina):
             lista_paginas.append(pagina-1)
             lista_paginas.append(pagina)
             lista_paginas.append(pagina+1)
+       
+
         context= { 
             'apellidos':apellidos, 
             'style_desc':style_desc,
@@ -329,7 +359,7 @@ def ranking_cantidad_asc(request,pagina):
             'pagina_next':pagina_next,
             'pagina_prev':pagina_prev,
             'lista_paginas':lista_paginas,
-            'style_asc':style_asc  
+            'style_asc':style_asc
             }
         return render(request, 'apellidos/ranking.html', context)
     except Exception as e:

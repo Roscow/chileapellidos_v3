@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 
@@ -205,3 +206,18 @@ class EstadoBase(models.Model):
     class Meta:
         managed = False
         db_table = 'estado_base'
+
+
+class Comentario(models.Model):
+    usuario = models.CharField(max_length=50)
+    titulo = models.CharField(max_length=200)
+    cuerpo = models.CharField(max_length=1000)
+    apellido = models.ForeignKey(Apellido, models.DO_NOTHING, blank=True, null=True)
+    fecha = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'comentario'
+
+    def __str__(self):
+        return f"{self.titulo} por {self.usuario}"
