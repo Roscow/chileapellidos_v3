@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase , Comentario
+from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase , Comentario , Visitas
 import random
 from django.db.models import Q
 from django.views import View
@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import os
 from django.core.mail import EmailMessage
 from django.utils import timezone
+from django.utils.timezone import now
 
 load_dotenv()
 
@@ -72,7 +73,6 @@ def obtener_relevancia_openai(prompt):
 def index(request):
     #ultimos_30_estados = EstadoBase.objects.all().order_by('fecha')[:30]
     ultimos_30_estados = EstadoBase.objects.all().order_by('-fecha')[:30]
-
     estado_mas_reciente = ultimos_30_estados[0]
     porcentaje_mujeres = round((estado_mas_reciente.cuenta_mujeres* 100)/estado_mas_reciente.cuenta_personas , 1)
     porcentaje_hombres = round((estado_mas_reciente.cuenta_hombres* 100)/estado_mas_reciente.cuenta_personas , 1)
@@ -158,11 +158,31 @@ def index(request):
     listado_cuenta = list()
     listado_dias =list()
     lista_cuenta_apellidos = list()
+    listado_vistas = list()
+    listado_fechas_visitas=list()
+
+    fecha_hoy = now().date()
+    fechas_ultimos_30_dias = [fecha_hoy - timedelta(days=i) for i in range(30)]
     lista_invertida = invertir_queryset(ultimos_30_estados)
     for e in lista_invertida:
         listado_cuenta.append(e.dif_personas)
         lista_cuenta_apellidos.append(e.dif_apellidos)
         listado_dias.append(e.fecha.strftime('%d-%m'))
+        
+
+    # Obtén los últimos 30 días en orden ascendente
+    ultimos_30_estados = EstadoBase.objects.all().order_by('-fecha')[:30]
+    visitas_ultimos_30_dias = Visitas.objects.all().order_by('-fecha')[:30]
+    visitas_ultimos_30_dias = invertir_queryset(visitas_ultimos_30_dias)
+    for e in visitas_ultimos_30_dias:
+        listado_vistas.append(e.diferencia)
+        listado_fechas_visitas.append(str( e.fecha))
+    visitas = Visitas.objects.last()
+     # Obtener las últimas 30 diferencias
+   
+    visitas_ultimos_30_dias = Visitas.objects.filter(fecha__in=fechas_ultimos_30_dias).order_by('-fecha')
+    visitas_ultimos_30_dias = invertir_queryset(visitas_ultimos_30_dias)
+
     context = {
         'estado_mas_reciente':estado_mas_reciente,
         'style_hombres':style_hombres,
@@ -174,7 +194,10 @@ def index(request):
         'detalle_regiones':detalle_regiones,
         'fechas_ultimos_30_dias_json': json.dumps(listado_dias),
         'cuentas_ultimos_30_dias_json': json.dumps(listado_cuenta),
-        'cuentas_apellidos_ultimos_30_dias_json': json.dumps(lista_cuenta_apellidos)
+        'cuentas_apellidos_ultimos_30_dias_json': json.dumps(lista_cuenta_apellidos),
+        'visitas':visitas,
+        'vistas_ultimos_30_dias_json': json.dumps(listado_vistas),
+        'listado_fechas_visitas':json.dumps(listado_fechas_visitas)
         }
     return render(request, 'apellidos/index.html', context)
 

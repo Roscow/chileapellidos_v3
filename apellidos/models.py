@@ -221,3 +221,17 @@ class Comentario(models.Model):
 
     def __str__(self):
         return f"{self.titulo} por {self.usuario}"
+    
+
+class Visitas(models.Model):
+    fecha = models.DateField(unique=True)
+    cuenta_actual = models.IntegerField()
+    cuenta_anterior = models.IntegerField()
+    diferencia = models.IntegerField(editable=False, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'visitas'
+
+    def __str__(self):
+        return f"Fecha: {self.fecha}, Cuenta Actual: {self.cuenta_actual}, Cuenta Anterior: {self.cuenta_anterior}, Diferencia: {self.diferencia}"

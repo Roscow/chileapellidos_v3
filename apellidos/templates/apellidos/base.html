@@ -113,5 +113,28 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     {% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+      <script>
+            // Función para manejar el envío del formulario y cambiar los botones a "Cargando..."
+            function handleFormSubmit(event) {
+                // Obtener todos los botones de tipo submit en el formulario
+                var submitButtons = this.querySelectorAll('button[type="submit"], input[type="submit"]');
+                
+                // Cambiar el texto de cada botón a "Cargando..."
+                submitButtons.forEach(function(button) {
+                    button.innerHTML = 'Cargando...';
+                    button.style.backgroundColor = '#6c757d'; // Gris oscuro
+                    button.style.cursor = 'not-allowed'; // Cambiar el cursor a "no permitido"
+                    button.disabled = true; // Deshabilitar el botón
+                });
+            }
+
+            // Obtener todos los formularios en la página
+            var forms = document.querySelectorAll('form');
+
+            // Añadir el manejador de eventos para el evento submit a cada formulario
+            forms.forEach(function(form) {
+                form.addEventListener('submit', handleFormSubmit);
+            });
+      </script>
 </body>
 </html>

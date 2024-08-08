@@ -126,7 +126,7 @@
     <br>
   <h4>Nuevo comentario</h4>
     <div id="form-container" style="border: 1px solid #ddd; padding: 20px; border-radius: 5px;">
-      <form action="{% url 'detalle_apellido' %}" method="post">
+      <form id="comment-form" action="{% url 'detalle_apellido' %}" method="post">
           {% csrf_token %}
           <div style="margin-bottom: 15px;">
               <input type="text" id="usuario" name="usuario" required placeholder="Usuario" 
@@ -141,29 +141,12 @@
               <textarea id="cuerpo" name="cuerpo" required placeholder="Escribe aquí tu comentario" 
                         style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; height: 100px;"></textarea>
           </div>
-          <button type="submit" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;">Enviar comentario</button>
-      </form>
+          <button id="submit-comment" type="submit" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;">Enviar comentario</button>
+        </form>
   </div>
-  
+
  <!--
 
-    <div id="form-container">
-      <form action="{% url 'detalle_apellido' %}" method="post">
-          {% csrf_token %}
-          <input type="text" id="usuario" name="usuario" required placeholder="Usuario">
-          <br>
-          <input type="hidden" name="apellido_id" value="{{ apellido.id }}">
-          <br>
-          <input type="text" id="titulo" name="titulo" required  placeholder="Titulo">
-          <br>
-          <textarea id="cuerpo" name="cuerpo" required placeholder="Escribe aqui tu comentario"></textarea>
-          <br>
-          <button type="submit">Enviar comentario</button>
-          <br>
-        </form>
-    </div>
-
- 
     <div class="row">
       <div class="col-12">
         <form method="post" action="{% url 'solicitud_revision' %}" id="emailMe">
@@ -240,5 +223,7 @@
         }
     }
   </script>
+
+
 
 {% endblock  %}
