@@ -235,3 +235,11 @@ class Visitas(models.Model):
 
     def __str__(self):
         return f"Fecha: {self.fecha}, Cuenta Actual: {self.cuenta_actual}, Cuenta Anterior: {self.cuenta_anterior}, Diferencia: {self.diferencia}"
+
+class GrupoApellido(models.Model):
+    grupo = models.IntegerField()
+    apellido = models.ForeignKey(Apellido, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'grupo_apellido'

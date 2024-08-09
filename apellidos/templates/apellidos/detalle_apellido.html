@@ -109,6 +109,22 @@
           </table>  
       </div>
     </div> 
+<hr>
+    <div class="row">
+        <h3>Grupo familiar</h3>
+      <p>
+          {% if lista_grupo_familiar %}
+            {% for g in lista_grupo_familiar %}
+            <a href="{% url 'detalle_apellido2' g.apellido %}">
+              {{g.apellido}}
+            </a>
+            {% endfor %}
+          {% else %}
+            No hay apellidos similares.
+          {% endif %}
+        </p>
+    </div>
+<hr>
     <h3>Comentarios</h3>
     {% if comentarios %}
         {% for c in comentarios %}

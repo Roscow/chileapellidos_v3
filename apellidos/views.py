@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase , Comentario , Visitas
+from .models import Persona, Apellido, Region, RegionApellido, Direccion , EstadoBase , Comentario , Visitas, GrupoApellido
 import random
 from django.db.models import Q
 from django.views import View
@@ -291,6 +291,14 @@ def detalle_apellido(request):
             listas_encabezados.append('80-89')
             listas_encabezados.append('90+')
             comentarios = Comentario.objects.filter(apellido_id=apellido_obj).order_by('-fecha')
+            
+            #obtener el grupo de apellidos 
+            grupo_obj = GrupoApellido.objects.filter(apellido = apellido_obj)
+            if len(grupo_obj)>0:
+                lista_grupo_familiar = GrupoApellido.objects.filter(grupo=grupo_obj[0].grupo)
+            else:
+                lista_grupo_familiar = list()
+
             context = {
                 'apellido':apellido_obj, 
                 'detalle_regiones':detalle_regiones,
@@ -302,7 +310,9 @@ def detalle_apellido(request):
                 'listado_etario_json':json.dumps(listado_etario),
                 'lista_encabezados_json':json.dumps(listas_encabezados),
                 'edad_promedio':edad_promedio,
-                'comentarios': comentarios   
+                'comentarios': comentarios,
+                'grupo_obj':grupo_obj,
+                'lista_grupo_familiar':lista_grupo_familiar   
                 }
             return render(request, 'apellidos/detalle_apellido.html',context)
         except Exception as e:
@@ -1298,6 +1308,14 @@ def detalle_apellido2(request,apellido):
         listas_encabezados.append('70-79')
         listas_encabezados.append('80-89')
         listas_encabezados.append('90+')
+        comentarios = Comentario.objects.filter(apellido_id=apellido_obj).order_by('-fecha')
+            
+        #obtener el grupo de apellidos 
+        grupo_obj = GrupoApellido.objects.filter(apellido = apellido_obj)
+        if len(grupo_obj)>0:
+            lista_grupo_familiar = GrupoApellido.objects.filter(grupo=grupo_obj[0].grupo)
+        else:
+            lista_grupo_familiar = list()
         context = {
             'apellido':apellido_obj, 
             'detalle_regiones':detalle_regiones,
@@ -1309,6 +1327,9 @@ def detalle_apellido2(request,apellido):
             'listado_etario_json':json.dumps(listado_etario),
             'lista_encabezados_json':json.dumps(listas_encabezados),
             'edad_promedio':edad_promedio,
+            'comentarios': comentarios,
+            'grupo_obj':grupo_obj,
+            'lista_grupo_familiar':lista_grupo_familiar  
             }
         return render(request, 'apellidos/detalle_apellido.html',context)
     except Exception as e:
