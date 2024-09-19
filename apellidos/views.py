@@ -206,8 +206,8 @@ def calcular_edad(fecha_nacimiento):
     edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
     return edad
 
-def detalle_apellido_original(request):
-    if request.method == 'POST':
+""" def detalle_apellido_original(request):
+   if request.method == 'POST':
         try:
             apellido_p = request.POST.get('apellido_id', None)
             apellido_p = apellido_p.lower()
@@ -318,6 +318,7 @@ def detalle_apellido_original(request):
         except Exception as e:
             context = {'error':e}
             return render(request, 'apellidos/error.html',context)
+ """ 
 
 def detalle_apellido(request):
     if request.method == 'POST' and 'apellido_p' in request.POST:
@@ -1318,7 +1319,7 @@ def ranking_mas_buscados_asc(request,pagina):
     except Exception as e:
         context = {'error':e}
         return render(request, 'apellidos/error.html', context)
- 
+"""  
 def detalle_apellido2(request,apellido):
     try:
         apellido_p = apellido
@@ -1402,7 +1403,7 @@ def detalle_apellido2(request,apellido):
     except Exception as e:
         context = {'error':e}
         return render(request, 'apellidos/error.html',context)
-
+ """
 def solicitud_revision(request):  
     if request.method == 'POST':
         try:
