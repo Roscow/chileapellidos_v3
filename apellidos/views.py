@@ -206,7 +206,7 @@ def calcular_edad(fecha_nacimiento):
     edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
     return edad
 
-def detalle_apellido(request):
+def detalle_apellido_original(request):
     if request.method == 'POST':
         try:
             apellido_p = request.POST.get('apellido_id', None)
@@ -318,7 +318,74 @@ def detalle_apellido(request):
         except Exception as e:
             context = {'error':e}
             return render(request, 'apellidos/error.html',context)
-        
+
+def detalle_apellido(request):
+    if request.method == 'POST' and 'apellido_p' in request.POST:
+        try:
+            apellido_p = request.POST['apellido_p']
+            apellido_p = apellido_p.lower()
+            apellido_p = apellido_p.capitalize()
+            apellido_p = apellido_p.strip()
+            apellido_p = reemplazar_tildes(apellido_p)
+
+            total_personas = Persona.objects.all().count()  #esto deberia estar en una tabla para no calcularlo con cada consulta 
+            apellido_obj = Apellido.objects.get(apellido=apellido_p)
+            apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1
+            apellido_obj.save()
+            
+            if apellido_obj.descripcion is None:
+                descripcion = obtener_origen_openai(apellido_p)
+                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido_p)
+                apellido_obj.descripcion = descripcion
+                apellido_obj.save()
+
+            total_apellido = int(apellido_obj.cuenta)
+            porcentaje_apellido = round((total_apellido * 100) / total_personas, 5)
+
+            regiones_orden_geografico = (15, 1, 2, 3, 4, 5, 13, 6, 7, 16, 8, 9, 14, 10, 11, 12, 17)
+            detalle_regiones = list()
+            edad_promedio = round(apellido_obj.edad_promedio)
+            
+            contador_region = RegionApellido.objects.filter(apellido=apellido_obj)
+            for i in regiones_orden_geografico:
+                region_obj = Region.objects.get(id=i)
+                region_apellido_elemento = contador_region.get(region=region_obj.id)
+                contador_r = region_apellido_elemento.cuenta
+                porcentaje = int(contador_r * 100) / total_apellido
+                style_width = f"width:{porcentaje}%;"
+                detalle_regiones.append((region_obj.numero, region_obj.nombre, contador_r, porcentaje, style_width))
+
+            porcentaje_mujeres = round((int(apellido_obj.mujeres) * 100) / int(apellido_obj.cuenta), 2)
+            porcentaje_hombres = round((int(apellido_obj.hombres) * 100) / int(apellido_obj.cuenta), 2)
+            style_mujeres = f"width:{porcentaje_mujeres}%;"
+            style_hombres = f"width:{porcentaje_hombres}%;"
+
+            listado_etario = [
+                apellido_obj.etario1, apellido_obj.etario2, apellido_obj.etario3,
+                apellido_obj.etario4, apellido_obj.etario5, apellido_obj.etario6,
+                apellido_obj.etario7, apellido_obj.etario8
+            ]
+            listas_encabezados = ['19-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
+
+            context = {
+                'apellido': apellido_obj,
+                'detalle_regiones': detalle_regiones,
+                'porcentaje_apellido': porcentaje_apellido,
+                'style_mujeres': style_mujeres,
+                'style_hombres': style_hombres,
+                'porcentaje_hombres': porcentaje_hombres,
+                'porcentaje_mujeres': porcentaje_mujeres,
+                'listado_etario_json': json.dumps(listado_etario),
+                'lista_encabezados_json': json.dumps(listas_encabezados),
+                'edad_promedio': edad_promedio,
+            }
+            return render(request, 'apellidos/detalle_apellido.html', context)
+
+        except Exception as e:
+            context = {'error': e}
+            return render(request, 'apellidos/error.html', context)
+
+
 #ranking de cantidad de personas ascendentes
 def ranking_cantidad_asc(request,pagina):
     try:
