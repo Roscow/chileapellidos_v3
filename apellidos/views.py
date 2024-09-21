@@ -70,6 +70,23 @@ def obtener_relevancia_openai(prompt):
     else:
         return f"Error en la solicitud: {response.status_code} - {response.text}"
 
+def personas_destacadas_openai(prompt):
+    url = "https://api.openai.com/v1/chat/completions"  # Asegúrate de tener la URL correcta según la documentación de OpenAI
+    clave_api = os.getenv("CLAVE_API_AI")  # Reemplaza con tu clave API de OpenAI
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {clave_api}",
+    }
+    data = {
+        "model": "gpt-4",  # Modelo específico de ChatGPT
+        "messages": [{"role": "system", "content": "cuentame sobre personajes importante en la historia de chile o la cultura chilena , solo si es que existen , con el apellido "}, {"role": "user", "content": prompt}],
+    }
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        return f"Error en la solicitud: {response.status_code} - {response.text}"
+
 def index(request):
     #ultimos_30_estados = EstadoBase.objects.all().order_by('fecha')[:30]
     ultimos_30_estados = EstadoBase.objects.all().order_by('-fecha')[:30]
@@ -335,8 +352,7 @@ def detalle_apellido(request):
             apellido_obj.save()
             
             if apellido_obj.descripcion is None:
-                descripcion = obtener_origen_openai(apellido_p)
-                descripcion = descripcion + ' ' + obtener_relevancia_openai(apellido_p)
+                descripcion = personas_destacadas_openai(apellido_p)
                 apellido_obj.descripcion = descripcion
                 apellido_obj.save()
 
