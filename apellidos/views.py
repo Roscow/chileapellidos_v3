@@ -79,7 +79,7 @@ def personas_destacadas_openai(prompt):
     }
     data = {
         "model": "gpt-4",  # Modelo específico de ChatGPT
-        "messages": [{"role": "system", "content": "cuentame sobre personajes importante en la historia de chile o la cultura chilena , solo si es que existen , con el apellido "}, {"role": "user", "content": prompt}],
+        "messages": [{"role": "system", "content": "cuentame sobre personajes importante en la historia de chile o la cultura chilena , solo si es que existen , con el apellido, siempre verifica que el personaje exista y siempre debe tener el apellido consultado"}, {"role": "user", "content": prompt}],
     }
     response = requests.post(url, json=data, headers=headers)
     if response.status_code == 200:
