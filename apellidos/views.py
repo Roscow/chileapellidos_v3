@@ -351,10 +351,10 @@ def detalle_apellido(request):
             apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1
             apellido_obj.save()
             
-            if apellido_obj.descripcion is None:
-                descripcion = personas_destacadas_openai(apellido_p)
-                apellido_obj.descripcion = descripcion
-                apellido_obj.save()
+            #if apellido_obj.descripcion is None:
+            #    descripcion = personas_destacadas_openai(apellido_p)
+            #    apellido_obj.descripcion = descripcion
+            #    apellido_obj.save()
 
             total_apellido = int(apellido_obj.cuenta)
             porcentaje_apellido = round((total_apellido * 100) / total_personas, 5)
