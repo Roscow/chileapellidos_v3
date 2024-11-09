@@ -18,7 +18,7 @@ SECRET_KEY = db_host = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'chileapellidos.org']
+ALLOWED_HOSTS = ['127.0.0.1', 'chileapellidos.org','octopus-app-yaqlv.ondigitalocean.app']
 
 
 # Application definition
