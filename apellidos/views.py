@@ -87,6 +87,23 @@ def personas_destacadas_openai(prompt):
     else:
         return f"Error en la solicitud: {response.status_code} - {response.text}"
 
+def datos_interesantes_openai(prompt):
+    url = "https://api.openai.com/v1/chat/completions"  # Asegúrate de tener la URL correcta según la documentación de OpenAI
+    clave_api = os.getenv("CLAVE_API_AI")  # Reemplaza con tu clave API de OpenAI
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {clave_api}",
+    }
+    data = {
+        "model": "gpt-3.5-turbo",  # Cambiado al modelo más económico
+        "messages": [{"role": "system", "content": "Datos interesantes sobre el siguiente apellido en chile: "}, {"role": "user", "content": prompt}], 
+    }
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        return f"Error en la solicitud: {response.status_code} - {response.text}"
+
 def index(request):
     #ultimos_30_estados = EstadoBase.objects.all().order_by('fecha')[:30]
     ultimos_30_estados = EstadoBase.objects.all().order_by('-fecha')[:30]
@@ -351,10 +368,10 @@ def detalle_apellido(request):
             apellido_obj.cuenta_busqueda = int(apellido_obj.cuenta_busqueda) + 1
             apellido_obj.save()
             
-            #if apellido_obj.descripcion is None:
-            #    descripcion = personas_destacadas_openai(apellido_p)
-            #    apellido_obj.descripcion = descripcion
-            #    apellido_obj.save()
+            if apellido_obj.descripcion is None:
+                descripcion = datos_interesantes_openai(apellido_p)
+                apellido_obj.descripcion = descripcion
+                apellido_obj.save()
 
             total_apellido = int(apellido_obj.cuenta)
             porcentaje_apellido = round((total_apellido * 100) / total_personas, 5)
@@ -401,7 +418,6 @@ def detalle_apellido(request):
         except Exception as e:
             context = {'error': e}
             return render(request, 'apellidos/error.html', context)
-
 
 #ranking de cantidad de personas ascendentes
 def ranking_cantidad_asc(request,pagina):
